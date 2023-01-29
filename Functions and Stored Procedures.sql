@@ -73,7 +73,7 @@ BEGIN
 	DECLARE @SalaryLevel NVARCHAR(20)
 	IF (@salary < 30000) SET @SalaryLevel = 'Low'
 	ELSE IF (@salary BETWEEN 30000 and 50000) SET @SalaryLevel = 'Average'
-	ELSE SET @SalaryLevel = 'High';
+	ELSE IF (@salary > 50000) SET @SalaryLevel = 'High';
 	RETURN @SalaryLevel;
 END
 
@@ -85,6 +85,50 @@ FROM
 
 
 
+--06. Employees by Salary Level
+CREATE OR ALTER PROC usp_EmployeesBySalaryLevel(@salaryLevel NVARCHAR(20))
+AS
+SELECT FirstName, LastName FROM Employees
+WHERE dbo.ufn_GetSalaryLevel(Salary) = @salaryLevel;
+
+EXEC usp_EmployeesBySalaryLevel 'high';
+
+
+--07. Define Function
+CREATE FUNCTION ufn_IsWordComprised(@setOfLetters NVARCHAR(MAX), @word NVARCHAR(MAX))
+RETURNS BIT
+BEGIN
+	DECLARE @index SMALLINT = 1
+	WHILE (@index <= LEN(@word))
+	BEGIN
+		DECLARE @currentChar NVARCHAR(2) = SUBSTRING(@word, @index, 1)
+		IF CHARINDEX(@currentChar
+		, @setOfLetters
+		, 1) = 0
+		RETURN 0
+		ELSE
+		SET
+		@index += 1
+	END
+	RETURN 1
+END
+
+CREATE TABLE Test (setOfLetters NVARCHAR(MAX), word NVARCHAR(MAX));
+GO
+
+INSERT
+	INTO
+	Test
+VALUES 
+  ('oistmiahf', 'Sofia')
+, ('oistmiahf', 'halves')
+, ('bobr', 'Rob')
+, ('pppp', 'Guy');
+GO
+
+SELECT setOfLetters, word,
+  dbo.ufn_IsWordComprised(setOfLetters, word) AS [Result]
+FROM Test
 
 
 
