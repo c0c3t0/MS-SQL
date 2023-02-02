@@ -1,3 +1,43 @@
+--01. Create Table Logs
+CREATE OR ALTER TRIGGER tr_AddToLogsOnSumChange
+ON
+Accounts FOR
+UPDATE
+	AS
+INSERT
+	INTO
+	Logs(AccountID
+	, OldSum
+	, NewSum)
+SELECT
+		i.Id
+	, d.Balance
+	, i.Balance
+FROM
+		inserted AS i
+JOIN deleted AS d ON
+		i.Id = d.Id;
+
+
+
+--02. Create Table Emails
+CREATE OR ALTER TRIGGER tr_NewEmailOnInsert
+ON
+Logs FOR
+INSERT
+	AS
+INSERT
+	INTO
+	NotificationEmails
+SELECT
+	i.AccountId
+	, CONCAT('Balance change for account: ', i.AccountId) AS Subject
+	, CONCAT('On ', GETDATE(), ' your balance was changed from ', i.OldSum, 'to ', i.NewSum, '.') AS Body
+FROM
+	inserted AS i;
+	
+	
+	
 --03. Deposit Money
 CREATE or ALTER PROC usp_DepositMoney(@AccountId int, @MoneyAmount money)
 AS
