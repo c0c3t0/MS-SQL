@@ -248,6 +248,36 @@ SELECT dbo.udf_FlightDestinationsByEmail('Montacute@gmail.com')
 SELECT dbo.udf_FlightDestinationsByEmail('MerisShale@gmail.com')
 
 
+--12. Full Info for Airports
+CREATE OR ALTER PROC usp_SearchByAirportName(@airportName varchar(70))
+AS
+BEGIN
+	SELECT
+	a.AirportName
+	, p.FullName
+	, CASE 
+		WHEN fd.TicketPrice <= 400 THEN 'Low'
+		WHEN fd.TicketPrice BETWEEN 401 AND 1500 THEN 'Medium'
+		WHEN fd.TicketPrice>1500 THEN 'High'
+	END
+	, ac.Manufacturer
+	, ac.[Condition]
+	, airt.TypeName
+FROM
+	FlightDestinations fd
+JOIN Airports a ON
+	a.Id = fd.AirportId
+JOIN Passengers p ON
+	p.Id = fd.PassengerId
+JOIN Aircraft ac ON
+	ac.Id = fd.AircraftId
+JOIN AircraftTypes airt ON
+	airt.Id = ac.TypeId
+WHERE
+	a.AirportName = @airportName
+ORDER BY
+	ac.Manufacturer
+	, p.FullName
+END
 
-
-
+EXEC usp_SearchByAirportName 'Sir Seretse Khama International Airport'
