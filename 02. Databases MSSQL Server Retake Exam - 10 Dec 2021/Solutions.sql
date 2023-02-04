@@ -178,6 +178,75 @@ ORDER BY
 
 
 --09. Regular Passengers
+SELECT
+	p.FullName
+	, fd.CountOfAircraft
+	, fd.TotalPayed
+FROM
+	(
+	SELECT
+		COUNT(*) AS CountOfAircraft
+		, fd.PassengerId
+		, SUM(fd.TicketPrice) AS TotalPayed
+	FROM
+		FlightDestinations fd
+	GROUP BY
+		PassengerId
+	HAVING
+		COUNT(*) >= 2) AS fd
+JOIN Passengers p ON
+	p.Id = fd.PassengerId
+WHERE
+	p.FullName LIKE '_a%'
+ORDER BY p.FullName;
+
+
+
+--10. Full Info for Flight Destinations
+SELECT
+	a.AirportName
+	, fd.[Start] AS DayTime
+	, fd.TicketPrice
+	, p.FullName
+	, ac.Manufacturer
+	, ac.Model
+FROM
+	FlightDestinations fd
+JOIN Airports a ON
+	fd.AirportId = a.Id
+JOIN Passengers p ON
+	fd.PassengerId = p.Id
+JOIN Aircraft ac ON
+	fd.AircraftId = ac.Id
+WHERE
+	(DATEPART(HOUR, [Start]) BETWEEN 6 AND 20)
+	AND TicketPrice > 2500
+ORDER BY
+	ac.Model;
+
+-- == [Section 4. Programmability (20 pts)] == --
+
+--11. Find all Destinations by Email Address
+CREATE FUNCTION udf_FlightDestinationsByEmail(@email varchar(50))
+RETURNs INT
+AS
+BEGIN
+	DECLARE @result int = (
+	SELECT
+		COUNT(*)
+	FROM
+		FlightDestinations AS fd
+	JOIN Passengers p ON p.Id = fd.PassengerId
+	WHERE p.Email = @email)
+	RETURN @result
+END
+
+SELECT dbo.udf_FlightDestinationsByEmail ('PierretteDunmuir@gmail.com')
+
+SELECT dbo.udf_FlightDestinationsByEmail('Montacute@gmail.com')
+
+SELECT dbo.udf_FlightDestinationsByEmail('MerisShale@gmail.com')
+
 
 
 
