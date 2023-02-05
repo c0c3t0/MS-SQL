@@ -3,7 +3,6 @@
 
 -- == [Section 1. DDL (30 pts)] == --
 
-
 --01. DDL
 CREATE DATABASE Service;
 GO
