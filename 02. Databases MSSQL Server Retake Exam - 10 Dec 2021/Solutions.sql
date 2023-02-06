@@ -1,6 +1,8 @@
 -- ***[Database Basics MS SQL Retake Exam – 10 Dec 2021]*** --
 
 -- === [Section 1. DDL (30 pts)] === --
+
+-- 01. DDL
 CREATE DATABASE Airport;
 GO
 
