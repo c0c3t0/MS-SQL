@@ -281,8 +281,3 @@ END
 EXEC usp_SearchByTaste 'Woody';
 
 
-
-
-
-
-
