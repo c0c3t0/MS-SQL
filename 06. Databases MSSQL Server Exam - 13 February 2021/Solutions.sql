@@ -189,4 +189,54 @@ ORDER BY
 
 
 
+--10. Average Size
+SELECT
+	u.Username
+	, AVG(ISNULL(f.[Size], 0)) AS [Size]
+FROM
+	Users u
+JOIN Commits c ON
+	c.ContributorId = u.Id
+JOIN Files f ON
+	c.Id = f.CommitId
+GROUP BY
+	c.ContributorId
+	, u.Username
+ORDER BY
+	AVG(f.[Size]) DESC
+	, Username;
 
+
+
+--11. All User Commits
+CREATE FUNCTION udf_AllUserCommits(@username varchar(30))
+RETURNS int
+AS
+BEGIN
+	RETURN (SELECT
+		COUNT(*)
+	FROM
+		Users u
+	JOIN Commits c ON
+		u.Id = c.ContributorId
+	WHERE u.Username = @username)
+END
+
+SELECT dbo.udf_AllUserCommits('UnderSinduxrein')
+
+
+--12. Search for Files
+CREATE OR ALTER PROC usp_SearchForFiles(@fileExtension varchar(10))
+AS
+BEGIN
+	SELECT
+		f.Id
+		, f.Name
+		, CONCAT(f.[Size], 'KB') AS [Size]
+	FROM
+		Files f
+	WHERE
+		f.Name LIKE CONCAT('%', @fileExtension, '%')
+END
+
+EXEC usp_SearchForFiles 'txt';
