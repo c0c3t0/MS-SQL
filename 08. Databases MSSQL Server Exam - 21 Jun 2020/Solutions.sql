@@ -108,6 +108,133 @@ ORDER BY
 
 
 --06. City Statistics
+SELECT
+	c.Name
+	, COUNT(*) AS Hotels
+FROM
+	Cities c
+JOIN Hotels h ON
+	h.CityId = c.Id
+GROUP BY
+	CityId
+	, c.Name
+ORDER BY
+	Hotels DESC
+	, c.Name;
+
+
+--07. Longest and Shortest Trips
+SELECT
+	info.AccountId
+	, info.LongestTrip
+	, info.ShortestTrip
+FROM
+	(
+	SELECT
+		atr.AccountId
+		, MAX(DATEDIFF(DAY, t.ArrivalDate, t.ReturnDate)) AS LongestTrip
+		, MIN(DATEDIFF(DAY, t.ArrivalDate, t.ReturnDate)) AS ShortestTrip
+	FROM
+		AccountsTrips atr
+	JOIN Trips t ON
+		atr.TripId = t.Id
+	WHERE
+		t.CancelDate IS NULL
+	GROUP BY
+		atr.AccountId) AS info
+JOIN Accounts a ON
+	a.Id = info.AccountId
+WHERE
+	a.MiddleName IS NULL
+ORDER BY
+	info.LongestTrip DESC
+	, info.ShortestTrip;
+
+
+
+--08. Metropolis
+SELECT
+	TOP 10
+	c.Id
+	, c.Name AS City
+	, c.CountryCode AS Country
+	, a.Accounts
+FROM
+	(
+	SELECT
+		CityId
+		, COUNT(*) AS Accounts
+	FROM
+		Accounts
+	GROUP BY
+		CityId) AS a
+JOIN Cities c ON
+	a.CityId = c.Id
+ORDER BY
+	a.Accounts DESC;
+
+
+
+--09. Romantic Getaways
+SELECT
+	a.Id
+	, a.Email
+	, c.Name AS City
+	, COUNT(atr.TripId) AS Trips
+FROM
+	Accounts a
+JOIN AccountsTrips atr ON
+	a.Id = atr.AccountId
+JOIN Trips t ON
+	t.Id = atr.TripId
+JOIN Rooms r ON
+	t.RoomId = r.Id
+JOIN Hotels h ON
+	h.CityId = a.CityId
+	AND h.Id = r.HotelId
+JOIN Cities c ON
+	a.CityId = c.Id
+GROUP BY
+	a.Id
+	, a.Email
+	, c.Name
+ORDER BY
+	Trips DESC, a.Id;
+
+
+
+--10. GDPR Violation
+SELECT
+	t.Id
+	, CONCAT(a.FirstName, ' ', a.MiddleName, ' ', a.LastName) AS FullName
+	, c.Name AS [From]
+	, c2.Name AS [To]
+	, CASE​
+110
+--06. City Statistics
+111
 SELECT * FROM Cities c
+		WHEN t.CancelDate IS NOT NULL THEN 'Canceled'
+		ELSE CONCAT(DATEDIFF(DAY, t.ArrivalDate, t.ReturnDate), ' days')
+	END AS Duration
+FROM
+	Trips t
+JOIN AccountsTrips at2 ON
+	at2.TripId = t.Id
+JOIN Accounts a ON
+	a.Id = at2.AccountId
+JOIN Cities c ON
+	c.Id = a.CityId
+JOIN Rooms r ON
+	r.Id = t.RoomId
+JOIN Hotels h ON
+	h.Id = r.HotelId
+JOIN Cities c2 ON
+	c2.Id = h.CityId
+ORDER BY
+	FullName
+	, t.Id;
+
+
 
 
