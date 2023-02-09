@@ -203,17 +203,14 @@ ORDER BY
 
 
 
+
 --10. GDPR Violation
 SELECT
 	t.Id
 	, CONCAT(a.FirstName, ' ', a.MiddleName, ' ', a.LastName) AS FullName
 	, c.Name AS [From]
 	, c2.Name AS [To]
-	, CASE​
-110
---06. City Statistics
-111
-SELECT * FROM Cities c
+	, CASE
 		WHEN t.CancelDate IS NOT NULL THEN 'Canceled'
 		ELSE CONCAT(DATEDIFF(DAY, t.ArrivalDate, t.ReturnDate), ' days')
 	END AS Duration
@@ -236,5 +233,135 @@ ORDER BY
 	, t.Id;
 
 
+
+-- 11. Available Room
+CREATE FUNCTION udf_GetAvailableRoom(@HotelId int, @Date date, @People int)
+RETURNS NVARCHAR(200)
+AS
+BEGIN
+	DECLARE 
+		@roomId INT = (
+			SELECT
+				TOP (1) r.Id
+			FROM
+				Trips AS t
+			JOIN Rooms AS r ON
+				t.RoomId = r.Id
+			JOIN Hotels AS h ON
+				r.HotelId = h.Id
+			WHERE
+				h.Id = @HotelId
+				AND @Date NOT BETWEEN t.ArrivalDate AND t.ReturnDate
+				AND t.CancelDate IS NULL
+				AND r.Beds >= @People
+				AND YEAR(@Date) = YEAR(t.ArrivalDate)
+			ORDER BY
+				r.Price DESC)
+    IF @roomId IS NULL
+        RETURN 'No rooms available'
+    DECLARE 
+    	@roomType NVARCHAR(20) = (
+			SELECT
+				[Type]
+			FROM
+				Rooms
+			WHERE
+				Id = @roomId)
+    DECLARE 
+    	@beds INT = (
+			SELECT
+				Beds
+			FROM
+				Rooms
+			WHERE
+				Id = @roomId)
+    DECLARE 
+    	@roomPrice DECIMAL(18, 2)= (
+			SELECT
+				Price
+			FROM
+				Rooms
+			WHERE
+				Id = @roomId)
+    DECLARE 
+    	@hotelBaseRate DECIMAL(5, 2)= (
+			SELECT
+				BaseRate
+			FROM
+				Hotels
+			WHERE
+				Id = @HotelId)
+    DECLARE 
+    	@totalPrice DECIMAL(18, 2)= (
+    		@hotelBaseRate + @roomPrice) * @People
+    RETURN CONCAT('Room ', @roomId, ': ', @roomType, ' (', @beds, ' beds) - $', @totalPrice)
+END
+
+SELECT dbo.udf_GetAvailableRoom(112, '2011-12-17', 2)
+
+SELECT dbo.udf_GetAvailableRoom(94, '2015-07-26', 3)
+
+
+
+-- 12. Switch Room
+CREATE OR ALTER PROC usp_SwitchRoom(@TripId int, @TargetRoomId int)
+AS
+BEGIN
+	DECLARE
+		@hotelRoomId int = (
+			SELECT
+				h.Id
+			FROM
+				Hotels h
+			JOIN Rooms r ON
+				h.Id = r.HotelId
+			WHERE
+				r.Id = @TargetRoomId);
+	DECLARE 
+		@hotelTripId int = (
+			SELECT h2.Id
+			FROM
+				Trips t
+			JOIN Rooms r2 ON
+				r2.Id = t.RoomId
+			JOIN Hotels h2 ON
+				r2.HotelId = h2.Id
+			WHERE
+				t.Id = @TripId);
+	DECLARE
+		@availableBeds int = (
+			SELECT
+				Beds
+			FROM
+				Rooms r3
+			WHERE
+				Id = @TargetRoomId);
+	DECLARE
+		@neededBeds int = (
+			SELECT
+				COUNT(AccountId)
+			FROM
+				AccountsTrips at2
+			WHERE
+				TripId = @TripId);
+	IF @hotelRoomId <> @hotelTripId
+		THROW 50001, 'Target room is in another hotel!', 1;
+	IF @availableBeds < @neededBeds
+		THROW 50002, 'Not enough beds in target room!', 1;
+	UPDATE
+		Trips
+	SET
+		RoomId = @TargetRoomId
+	WHERE
+		Id = @TripId;
+END
+
+EXEC usp_SwitchRoom 10, 11;
+
+SELECT RoomId FROM Trips WHERE Id = 10;
+
+EXEC usp_SwitchRoom 10, 7;
+
+EXEC usp_SwitchRoom 10, 8;
 
 
