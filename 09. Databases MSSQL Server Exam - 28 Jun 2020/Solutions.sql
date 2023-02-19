@@ -36,7 +36,7 @@ CREATE TABLE Journeys(
 	, JourneyEnd datetime NOT NULL
 	, Purpose varchar(11) CHECK(Purpose IN ('Medical', 'Technical', 'Educational', 'Military'))
 	, DestinationSpaceportId int NOT NULL FOREIGN KEY REFERENCES Spaceports(Id)
-	, SpaceshipId int NOT NULL FOREIGN KEY REFERENCES Spaceships(Id)
+	, SpaceshipId int FOREIGN KEY REFERENCES Spaceships(Id)
 	);
 	
 CREATE TABLE TravelCards(
