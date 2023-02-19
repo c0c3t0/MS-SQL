@@ -65,7 +65,7 @@ INSERT INTO Spaceships(Name, Manufacturer, LightSpeedRate) VALUES
 UPDATE
 	Spaceships
 SET
-	LightSpeedRate = 1
+	LightSpeedRate += 1
 WHERE
 	Id BETWEEN 8 AND 12;
 
