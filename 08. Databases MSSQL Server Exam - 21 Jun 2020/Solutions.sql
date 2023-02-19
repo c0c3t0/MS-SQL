@@ -203,11 +203,10 @@ ORDER BY
 
 
 
-
---10. GDPR Violation
+--10. GDPR Violation - CONCAT_WS in Judge
 SELECT
 	t.Id
-	, CONCAT(a.FirstName, ' ', a.MiddleName, ' ', a.LastName) AS FullName
+	, CONCAT_WS(' ', a.FirstName, a.MiddleName, a.LastName) AS FullName
 	, c.Name AS [From]
 	, c2.Name AS [To]
 	, CASE
@@ -231,7 +230,6 @@ JOIN Cities c2 ON
 ORDER BY
 	FullName
 	, t.Id;
-
 
 
 -- 11. Available Room
