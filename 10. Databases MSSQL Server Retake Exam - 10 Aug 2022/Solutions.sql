@@ -212,7 +212,7 @@ ORDER BY
 
 
 --11. Tourists Count on a Tourist Site
-CREATE OR ALTER FUNCTION udf_GetTouristsCountOnATouristSite (@Site varchar(30))
+CREATE OR ALTER FUNCTION udf_GetTouristsCountOnATouristSite (@Site varchar(max))
 RETURNS int
 AS
 BEGIN
