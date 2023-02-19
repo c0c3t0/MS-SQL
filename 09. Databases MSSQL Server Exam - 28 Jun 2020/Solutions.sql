@@ -142,27 +142,10 @@ JOIN TravelCards tc ON
 JOIN Colonists c ON
 	c.Id = tc.ColonistId
 WHERE
-	DATEDIFF(YEAR, c.BirthDate, '2019') < 30
+	tc.JobDuringJourney = 'Pilot'
+	AND DATEDIFF(YEAR, c.BirthDate, '2019') <= 30
 ORDER BY
 	s.Name;
-
-
---09. Select all planets and their journey count
-SELECT
-	p.Name
-	, COUNT(*) AS JourneysCount
-FROM
-	Planets p
-JOIN Spaceports s ON
-	p.Id = s.PlanetId
-JOIN Journeys j ON
-	j.DestinationSpaceportId = s.Id
-GROUP BY
-	p.Id
-	, p.Name
-ORDER BY
-	JourneysCount DESC
-	, p.Name;
 
 
 
